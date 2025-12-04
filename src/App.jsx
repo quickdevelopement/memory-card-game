@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 
@@ -22,13 +22,23 @@ const cardImages = [
 ]
 
 function App() {
-  const [cards, setCards] = useState([...cardImages, ...cardImages]);
+  const [cards, setCards] = useState([]);
+
+  // shuffle cards with added id
+  const shuffleCards = ()=>{
+    const shuffled = [...cardImages, ...cardImages].sort(()=> Math.random() - 0.5).map((card)=> ({...card, id: Math.random()}));
+    setCards(shuffled);
+  };
+
+  useEffect(()=>{
+    shuffleCards();
+  }, []);
 
   return (
     <>
       <div className='min-h-screen flex flex-col items-center py-10 transition duration-300'>
           <h1 className='text-3xl font-bold mb-4 dark:text-white text-green-600'>Memory Card Game</h1>
-          <div className='grid grid-cols-4 gap-4 w-[350px] sm:w-[500px]'>
+          <div className='grid grid-cols-4 gap-2 w-[350px] sm:w-[500px]'>
             {
               cards.map((card)=>(
                 <div key={card.src}>
@@ -36,8 +46,12 @@ function App() {
                     className='relative w-full h-30 sm:h-45 cursor-pointer transform transition-transform duration-300'
                   >
                     <img src={card.src} alt="Card Image"
-                      className='absolute inset-0 w-full h-full rounded-lg backface'
+                      className='absolute inset-0 w-full h-full rounded-lg backface-hidden'
                     />
+
+                    <div className='absolute inset-0 w-full h-full rounded-lg bg-blue-500 flex items-center justify-center text-white text-2xl font-bold'>
+                      ?
+                    </div>
                   </div>
                 </div>
 
