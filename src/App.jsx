@@ -12,6 +12,7 @@ import elius from './assets/images/elius-kanchon.jpg';
 
 import flip from './assets/media/audio/flipSound.mp3';
 import match from './assets/media/audio/matchSound.mp3';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 
 // data
@@ -31,6 +32,7 @@ function App() {
   const [choiceOne, setChoiceOne] = useState(null);
   const [choiceTwo, setChoiceTwo] = useState(null);
   const [disabled, setDisabled] = useState(false);
+  const [theme, setTheme] = useState('dark');
 
   // Game Sound Effects
   const flipSound = new Audio(flip);
@@ -93,8 +95,11 @@ function App() {
 
   return (
     <>
-      <div className='min-h-screen flex flex-col items-center py-10 transition duration-300'>
+      <div className={`min-h-screen flex flex-col items-center py-10 transition duration-300 ${ theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-green-50 text-gray-900' }`}>
           <h1 className='text-3xl font-bold mb-4 dark:text-white text-green-600'>Memory Card Game</h1>
+          <button onClick={()=> setTheme(theme === 'dark' ? 'light' : 'dark')} className='absolute top-4 right-4 text-2xl'>
+            { theme === 'dark' ? <FiSun />: <FiMoon /> }
+          </button>
 
           <button onClick={shuffleCards} className='mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300'>New Game</button>
           <div className='text-2xl'>Turns: {turns}</div>
