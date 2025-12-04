@@ -10,6 +10,10 @@ import amin from './assets/images/amin-khan.jpg';
 import elius from './assets/images/elius-kanchon.jpg';
 
 
+import flip from './assets/media/audio/flipSound.mp3';
+import match from './assets/media/audio/matchSound.mp3';
+
+
 // data
 
 const cardImages = [
@@ -28,6 +32,10 @@ function App() {
   const [choiceTwo, setChoiceTwo] = useState(null);
   const [disabled, setDisabled] = useState(false);
 
+  // Game Sound Effects
+  const flipSound = new Audio(flip);
+  const matchSound = new Audio(match);
+
   // shuffle cards with added id
   const shuffleCards = ()=>{
     const shuffled = [...cardImages, ...cardImages].sort(()=> Math.random() - 0.5).map((card)=> ({...card, id: Math.random()}));
@@ -43,6 +51,7 @@ function App() {
 
   // handle a choice
   const handleChoice = (card)=>{
+    flipSound.play();
     choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
   };
 
@@ -62,6 +71,7 @@ function App() {
       if(choiceOne.src === choiceTwo.src){
 
         // matched shoud
+        matchSound.play();
 
         setCards(prev=>{
           return prev.map(card=>{
@@ -91,7 +101,7 @@ function App() {
           <div className='grid grid-cols-4 gap-2 w-[350px] sm:w-[500px]'>
             {
               cards.map((card)=>(
-                <div key={card.src}>
+                <div key={card.id}>
                   <div
                     onClick={()=> !disabled && handleChoice(card)}
                     className={`relative w-full h-30 sm:h-45 cursor-pointer transform transition-transform duration-300 ${ (card === choiceOne || card === choiceTwo || card.matched) ? 'rotate-y-180' : '' }`}
