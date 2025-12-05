@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 
@@ -8,6 +8,11 @@ import rubel from './assets/images/rubel.jpg';
 import sakib from './assets/images/sakib-khan.jpg';
 import amin from './assets/images/amin-khan.jpg';
 import elius from './assets/images/elius-kanchon.jpg';
+
+
+import flip from './assets/media/audio/flipSound.mp3';
+import match from './assets/media/audio/matchSound.mp3';
+import { FiSun, FiMoon } from 'react-icons/fi';
 
 
 // data
@@ -22,30 +27,105 @@ const cardImages = [
 ]
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [cards, setCards] = useState([]);
+  const [turns, setTurns] = useState(0);
+  const [choiceOne, setChoiceOne] = useState(null);
+  const [choiceTwo, setChoiceTwo] = useState(null);
+  const [disabled, setDisabled] = useState(false);
+  const [theme, setTheme] = useState('dark');
+
+  // Game Sound Effects
+  const flipSound = new Audio(flip);
+  const matchSound = new Audio(match);
+
+  // shuffle cards with added id
+  const shuffleCards = ()=>{
+    const shuffled = [...cardImages, ...cardImages].sort(()=> Math.random() - 0.5).map((card)=> ({...card, id: Math.random()}));
+    setCards(shuffled);
+    setTurns(0);
+    setChoiceOne(null);
+    setChoiceTwo(null);
+  };
+
+  useEffect(()=>{
+    shuffleCards();
+  }, []);
+
+  // handle a choice
+  const handleChoice = (card)=>{
+    flipSound.play();
+    choiceOne ? setChoiceTwo(card) : setChoiceOne(card);
+  };
+
+  // reset choices & increase turn
+
+  const resetTurn = ()=>{
+    setChoiceOne(null);
+    setChoiceTwo(null);
+    setTurns(prev=> prev + 1);
+    setDisabled(false);
+  };
+
+  useEffect(()=>{
+    if(choiceOne && choiceTwo){
+      setDisabled(true);
+
+      if(choiceOne.src === choiceTwo.src){
+
+        // matched shoud
+        matchSound.play();
+
+        setCards(prev=>{
+          return prev.map(card=>{
+            if(card.src === choiceOne.src){
+              return {...card, matched: true}
+            }else{
+              return card;
+            }
+          })
+        });
+        resetTurn();
+      }else{
+        setTimeout(()=>resetTurn(), 1000);
+      }
+    }
+
+
+  },[choiceOne, choiceTwo]);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className={`min-h-screen flex flex-col items-center py-10 transition duration-300 ${ theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-green-50 text-gray-900' }`}>
+          <h1 className='text-3xl font-bold mb-4 dark:text-white text-green-600'>Memory Card Game</h1>
+          <button onClick={()=> setTheme(theme === 'dark' ? 'light' : 'dark')} className='absolute top-4 right-4 text-2xl'>
+            { theme === 'dark' ? <FiSun />: <FiMoon /> }
+          </button>
+
+          <button onClick={shuffleCards} className='mb-6 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300'>New Game</button>
+          <div className='text-2xl'>Turns: {turns}</div>
+          <div className='grid grid-cols-4 gap-2 w-[350px] sm:w-[500px]'>
+            {
+              cards.map((card)=>(
+                <div key={card.id}>
+                  <div
+                    onClick={()=> !disabled && handleChoice(card)}
+                    className={`relative w-full h-30 sm:h-45 cursor-pointer transform transition-transform duration-300 ${ (card === choiceOne || card === choiceTwo || card.matched) ? 'rotate-y-180' : '' }`}
+                  >
+                    <img src={card.src} alt="Card Image"
+                      className={`absolute inset-0 w-full h-full rounded-lg backface-hidden ${ (card === choiceOne || card === choiceTwo || card.matched) ? 'opacity-100' : 'opacity-0' }`}
+                    />
+
+                    <div className={`absolute inset-0 w-full h-full rounded-lg bg-blue-500 flex items-center justify-center text-white text-2xl font-bold backface-hidden ${ (card === choiceOne || card === choiceTwo || card.matched) ? 'opacity-0' : 'opacity-100' }`}>
+                      ?
+                    </div>
+                  </div>
+                </div>
+
+              ))
+            }
+          </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      
     </>
   )
 }
